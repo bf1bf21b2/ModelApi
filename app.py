@@ -43,16 +43,4 @@ async def predict(request: Request, file: UploadFile = File(...)):
 
     return {"class": predicted_label, "confidence": float(confidence)}
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return """
-    <html>
-        <body>
-            <h1>Upload an image</h1>
-            <form action="/predict/" method="post" enctype="multipart/form-data">
-                <input type="file" name="file">
-                <input type="submit" value="Upload">
-            </form>
-        </body>
-    </html>
-    """
+
