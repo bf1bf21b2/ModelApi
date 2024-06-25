@@ -1,8 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
-from keras.models import load_model
-from keras.preprocessing import image
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image
 import numpy as np
-from starlette.requests import Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,27 +19,14 @@ app.add_middleware(
 )
 
 @app.post("/predict/")
-async def predict(request: Request, file: UploadFile = File(...)):
-    contents = await file.read()
-    with open(file.filename, "wb") as f:
-        f.write(contents)
-
-    img = image.load_img(file.filename, target_size=(244, 244))
+async def predict(file: UploadFile = File(...)):
+    img = image.load_img(file.file, target_size=(244, 244))
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
 
-    prediction = model.predict(img_array)
-    predicted_class = np.argmax(prediction[0])
-    confidence = prediction[0][predicted_class]
+    predictions = model.predict(img_array)
+    predicted_class = class_names[np.argmax(predictions)]
 
-    # Threshold confidence level for prediction
-    threshold = 0.5  # Adjust this value based on your requirements
-
-    if confidence >= threshold and predicted_class in class_names:
-        predicted_label = class_names[predicted_class]
-    else:
-        predicted_label = "Unknown"
-
-    return {"class": predicted_label, "confidence": float(confidence)}
+    return {"predicted_class": predicted_class}
 
 
